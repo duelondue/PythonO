@@ -1,0 +1,93 @@
+######-----Master Mind Game------######
+
+
+from mislibrerias import entradas #just to transform inputs into the correct sintaxis...quite easy to program or to do it manually.
+import random
+
+
+def startgame():
+    validation=False
+    number=0
+    characters=range(2,7)#from number 2 to 6
+    while not validation:
+        number=entradas.get_int("Enter how many numbers you want to play: ")
+        if number not in characters:
+            print("not properly enter the data, try again")
+        else:
+            validation=True
+    return number #the return is the amount of numbers to be discovered
+    
+    
+def playerchoice(n):
+    valid_choice=False
+    while not valid_choice:
+        choice=entradas.get_str("Enter a number: ")#The choice is a string that will be integer afterwards.-->I would mark it when it happends.
+        valid_choice=valid_playerchoice(choice, n)#the output comes from another fuction, which checks wheter
+        #the selectednumber is valid or not
+        if not valid_choice:#in case is not valid
+            print("The number played is not valid, enter a number again.")
+    return choice
+#the return es the chosen number of the player...it's choice
+#the return es the chosen number of the player...it's choice
+
+###--- it must be figure out whether the player's choice is suitable or not
+
+def valid_playerchoice(choice, n):
+    #this fuction takes the choice and the numbers to play has inputs... the returns if the player's choice is valid.
+    if choice=="exit":
+        return True # with this choice of def playerchoice(): will return True and it is finished.
+    else:
+        #we must iterative among each number of the string.
+        valid_choice,i=True,0
+        valid_options="0123456789"
+        while valid_choice and i<len(choice):
+            #the algorithm does not know what you can enter as input for your chain
+            valid_choice=choice[i] in valid_options   
+            i=i+1
+    return valid_choice and (len(choice)==n)
+#The return will be True if valid_choice is good and the len of choice is equal to the n=characters to be played
+
+###Then, we must focus on the game.... count darks and whites an properly give an output
+
+def countdw(choice,solution):
+    #this fuction takes the input of the player and the random solution to compute black&whites
+    darks,whites=0,0
+    for i in range(len(choice)):
+        darks=darks+ 1 if (solution[i]==choice[i]) else darks
+        whites=whites+ 1 if (choice[i]!=solution[i]) and (choice[i] in solution) else whites
+    return darks, whites
+    
+    
+
+ def play(solution,number):
+    #solution is generated outside
+    
+    iteration=False
+    while not iteration:
+        choice=playerchoice(number)#see the first fuction to get ¡number!
+        #in the line above, the check is done internally.
+        if choice=="exit":
+            iteration=True
+            print("You have finished the game. Au revoir. ")
+        else:
+            #this is the point to transform our string in intenger...to count d&w
+            choice=[int(x) for x in choice]#now choice is an integer --->now it is an integer!
+            darks,whites=countdw(choice,solution)
+            if darks==number:
+                iteration=True#the game is finished
+                print("You have won. The game is finished. Congratulations!", choice)
+                
+            else:
+                print(choice, "darks: ", darks, "whites: ", whites)
+                
+       
+####Let'start playing
+
+print("----Play Master Mind game----- remember: exit as input will stop the game------------")
+number=startgame()
+print(number)
+#because the return of this function is the number to be played
+solution = [random.randint(0,9) for _ in range(number)]
+print(solution)
+#solution is a integer number which contains 0123456789 number and exactly range(number) numbers.
+play(solution, number)
