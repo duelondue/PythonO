@@ -1,0 +1,55 @@
+#Create an excel file (.csv) retrieveing name address tlf mail of certain restaurants working for a hubrestaurant.
+import requests
+from bs4 import BeautifulSoup
+import re
+from mislibrerias import textos
+
+##Imports and froms comments##
+
+#request, bs4 for retrieving WebPageData
+
+#Some regular expresions may be needed -> Re
+
+#"textos" deletes non valid characters for creating strings and future URL
+
+##Hubrestaurant
+url = "https://misssushi.es/localiza-tu-misssushi-mas-cercano/"
+req=requests.get(url)#with get, access open to the web page indicate by the URL
+source = req.text #text=obtaining source attributes from the web page
+#misushi is the main web page and far more are working inside it.
+
+soup= BeautifulSoup(source, "html.parser")#soup variable created and our code is html
+
+#currently, we are in the page as we would enter from our browser and pressed ctrl+u
+
+links=[element.get('href') for element in soup.find_all("a",href=re.compile(r'.*restaurantes.*') )]
+
+# get.("href") because is the reference of the tag "a" from the web page browser
+#using re.compile makes much more easier
+# r'=regular expresion
+    # r'something whatever//restaurantes//somethin whatever
+#   . = whatever element  *= the number -> .*=from 0 to undefined elements
+
+###now, all the URL restaurants all compiled in links
+
+def retrieve_data (link):
+    reql=requests.get(link)
+    sourcel = reql.text
+    soupl = BeautifulSoup(sourcel, 'html.parser')
+    data = soupl.find('div', attrs={'class': 'info-restaurant-item-info'})
+    r_name=textos.clean_str(data.find('h1').text)
+    r_address=textos.clean_str(data.find("address" ).text)
+    r_tlf=textos.clean_str(data.find("div", attrs={"class" : 'phone-link'}).text)
+    r_mail=textos.clean_str(data.find('a', href=re.compile(r'mailto.*')).text)
+    return [r_name, r_tlf, r_address, r_mail]
+
+outputs = [retrieve_data(link) for link in links]
+
+with open('data_file.csv', 'w') as file: # 'w'=write
+    for each in outputs:
+        result_as_string = ';'.join(each)
+        file.write(result_as_string)
+        file.write("\n\n")
+    file.close()
+
+print("finished")
